@@ -112,7 +112,7 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     // Recreate database if they do not have all of the fields
-    /*private void recreateMapsTable(SQLiteDatabase db1) throws SQLException {
+    public void recreateMapsTable(SQLiteDatabase db1) throws SQLException {
         // Read what is currently in the database into mapList.
         // Delete database and recreate it. Restore data.
         ArrayList<PDFMap> mapList = new ArrayList<>();
@@ -137,16 +137,20 @@ public class DBHandler extends SQLiteOpenHelper {
                     map.setDistToMap(cursor.getString(8));
                 } else {
                     // Calculate the File Size
-                    File file = new File(map.getPath());
-                    String fileSize;
-                    long size = file.length() / 1024; // Get size and convert bytes into Kb.
-                    if (size >= 1024) {
-                        double sizeDbl = (double) size;
-                        fileSize = String.format(Locale.US, "%.1f%s", (sizeDbl / 1024), context.getResources().getString(R.string.Mb));
-                    } else {
-                        fileSize = size + context.getResources().getString(R.string.Kb);
+                    try{
+                        File file = new File(map.getPath());
+                        String fileSize;
+                        long size = file.length() / 1024; // Get size and convert bytes into Kb.
+                        if (size >= 1024) {
+                            double sizeDbl = (double) size;
+                            fileSize = String.format(Locale.US, "%.1f%s", (sizeDbl / 1024), context.getResources().getString(R.string.Mb));
+                        } else {
+                            fileSize = size + context.getResources().getString(R.string.Kb);
+                        }
+                        map.setFileSize(fileSize);
+                    }catch (NullPointerException e){
+                        map.setFileSize("");
                     }
-                    map.setFileSize(fileSize);
                     map.setDistToMap("");
                 }
                 if (cursor.getColumnCount() == 10){
@@ -167,7 +171,7 @@ public class DBHandler extends SQLiteOpenHelper {
         for (int i=0; i<mapList.size(); i++){
             addMapToMapsTable(db1, mapList.get(i));
         }
-    }*/
+    }
 
     //------------------------------------
     //  SETTINGS TABLE
@@ -265,6 +269,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public ArrayList<PDFMap> getAllMaps() throws SQLiteException {
         // Called by CustomAdapter creation
         SQLiteDatabase db = this.getWritableDatabase();
+
         ArrayList<PDFMap> mapList = new ArrayList<>();
         // Select All Query
         String selectQuery = "SELECT * FROM " + TABLE_MAPS;
@@ -282,26 +287,29 @@ public class DBHandler extends SQLiteOpenHelper {
                 map.setThumbnail(cursor.getString(5));
                 map.setName(cursor.getString(6));
                 map.setFileSize(cursor.getString(7));
-                if (map.getFileSize() == ""){
-                    File file = new File(map.getPath());
-                    String fileSize;
-                    long size = file.length() / 1024; // Get size and convert bytes into Kb.
-                    if (size >= 1024) {
-                        double sizeDbl = (double) size;
-                        fileSize = String.format(Locale.US, "%.1f%s", (sizeDbl / 1024), context.getResources().getString(R.string.Mb));
-                    } else {
-                        fileSize = size + context.getResources().getString(R.string.Kb);
+                if (map.getFileSize() == "") {
+                    try {
+                        File file = new File(map.getPath());
+                        String fileSize;
+                        long size = file.length() / 1024; // Get size and convert bytes into Kb.
+                        if (size >= 1024) {
+                            double sizeDbl = (double) size;
+                            fileSize = String.format(Locale.US, "%.1f%s", (sizeDbl / 1024), context.getResources().getString(R.string.Mb));
+                        } else {
+                            fileSize = size + context.getResources().getString(R.string.Kb);
+                        }
+                        map.setFileSize(fileSize);
+                    }catch (NullPointerException e){
+                        map.setFileSize("");
                     }
-                    map.setFileSize(fileSize);
                 }
                 map.setDistToMap(cursor.getString(8));
                 if (map.getDistToMap().equals("")) {
                     map.setMiles(0.0);
-                }
-                else {
+                } else {
                     try {
                         map.setMiles(Double.parseDouble(map.getDistToMap()));
-                    }catch(NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         map.setMiles(-999.99);
                     }
                 }

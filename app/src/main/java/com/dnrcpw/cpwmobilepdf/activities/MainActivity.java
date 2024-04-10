@@ -56,6 +56,7 @@ import com.google.android.play.core.install.model.InstallStatus;
 import com.google.android.play.core.install.model.UpdateAvailability;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -588,10 +589,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // GET THE LIST FROM THE DATABASE
         try {
             myAdapter = new CustomAdapter(MainActivity.this, dbHandler.getAllMaps(), dbHandler, dbWayPtHandler);
-        } catch (SQLException e) {
-            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-            return;
+        } catch (SQLException | NullPointerException e) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Error");
+            if (e.getMessage() != null)
+                builder.setMessage("Cannot read your maps from the disk. Is the disk full? Are too many apps running? Error message: "+e.getMessage());
+            else
+                builder.setMessage("Cannot read your maps from the disk. Is the disk full? Are too many apps running?");
+            builder.setPositiveButton("CLOSE APP", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    // send email TODO
+
+                    // Close the app
+                    System.exit(1);
+                }
+            }).show();
+            myAdapter = new CustomAdapter(MainActivity.this, new ArrayList<>(), dbHandler, dbWayPtHandler);
         }
+
         lv = findViewById(R.id.lv);
         lv.setAdapter(myAdapter);
 
@@ -958,7 +973,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     myAdapter.removeAll();
                     // Disable "Delete all Imported Maps" if there aren't any maps
                     MenuItem delMapsMenuItem = toolbar.getMenu().findItem(R.id.action_deleteAll);
-                    delMapsMenuItem.setEnabled(myAdapter.pdfMaps.size() != 0);
+                    delMapsMenuItem.setVisible(myAdapter.pdfMaps.size() != 0); // setEnabled(myAdapter.pdfMaps.size() != 0);
                     // Display note if no records found
                     showHideNoImportsMessage();
                     break;
@@ -975,9 +990,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         // Disable "Delete all Imported Maps" if there aren't any maps
+        if (toolbar == null) {
+            toolbar = findViewById(R.id.toolbar);
+        }
         MenuItem delMapsMenuItem = toolbar.getMenu().findItem(R.id.action_deleteAll);
         if (delMapsMenuItem != null)
-            delMapsMenuItem.setEnabled(myAdapter.pdfMaps.size() != 0);
+            delMapsMenuItem.setVisible(myAdapter.pdfMaps.size() != 0);// setEnabled(myAdapter.pdfMaps.size() != 0);
         return true;
     }
 

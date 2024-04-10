@@ -403,6 +403,7 @@ public class PDFActivity extends AppCompatActivity implements SensorEventListene
                         longNow < (long2 + quarterMileInDegrees)){
                         // Get list of all available maps and see if the current location is on or within a 1/4 mile of one or more of them
                         ArrayList<Integer> mapIds = new ArrayList<>();// pdf maps that the current location is on
+                        if (maps == null) return;
                         for (int i = 0; i < maps.size(); i++) {
                             PDFMap map = maps.get(i);
                             if (map.getName().equals(mapName)) continue; // don't list current map
@@ -1400,7 +1401,11 @@ public class PDFActivity extends AppCompatActivity implements SensorEventListene
             portraitLocked = myMap.getMapOrientation().equals("portrait");
             landscapeLocked = myMap.getMapOrientation().equals("landscape");
             // get all maps for load adjacent maps and lock map in portrait or landscape
-            maps = db2.getAllMaps();
+            try {
+                maps = db2.getAllMaps();
+            }catch (SQLException | NullPointerException e) {
+                Toast.makeText(PDFActivity.this, getResources().getString(R.string.problemReadingDatabase) + e.getMessage(),Toast.LENGTH_LONG).show();
+            }
             // Update Waypoints
             wayPts = db.getWayPts(mapName);
         }catch (Exception e){

@@ -41,7 +41,7 @@ android {
     // File / Settings / under Languages & Frameworks / Android SDK.
     // Select SDK Tools tab. Check Show Package Details. Install latest NDK version. Update NDK version below.
     // Use 'FULL' or if > 300mb use 'SYMBOL_TABLE'
-    ndkVersion "26.2.11394342" //"23.1.7779620"
+    ndkVersion "26.2.11394342"
     compileSdkVersion 34 // when remove this it does not compile
     //buildToolsVersion "34.0.0" //"30.0.3"
 
@@ -52,8 +52,8 @@ android {
         applicationId 'com.dnrcpw.cpwmobilepdf'
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 61
-        versionName "1.5.0"
+        versionCode 66
+        versionName "1.5.6"
         // History
         // v1.3.01 Removed asynctask
         // v1.3.02 Adjust waypoint on long click, added edit, move, delete buttons to top menu
@@ -100,6 +100,10 @@ android {
         //       Reset getting the writable database to how it used to be done.
         // v1.4.9 3/26/24 Edit map help. Edit comments for load adjacent maps. New NDK version.
         // v1.5.0 3/28/24 Fix spelling error with push pin to pushpin. Add help documentation for user preferences.
+        // v1.5.2 3/28/24 removed ndk {debugSymbolLevel 'FULL'} and use the one at the bottom. Had 2.
+        // v1.5.3 3/28/24 update gradle 8.2.2
+        // v1.5.5 3/28/24 remove last line android.buildTypes.release.ndk.debugSymbolLevel = 'FULL' Use the one up above.
+        // v1.5.6 4/10/24 Add more error checking.
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         /* to use Java 8 Lambda expressions. This overrides Gradle Settings for JDK */
@@ -132,6 +136,9 @@ android {
             // if this does not work try:
             // cd app/build/intermediates/cmake/universal/release/obj  cmake does not exist
             // zip -r symbols.zip .
+            // cd to CPWMobilePDF/app/build/intermediates/merged_native_libs/release/out/lib
+            // select all directories, right click send to compressed. Named file Symbol.zip
+            // upload this file
             ndk {
                 debugSymbolLevel 'FULL'
             }
@@ -200,5 +207,5 @@ dependencies {
     android.defaultConfig.vectorDrawables.useSupportLibrary = true
 
     // to include symbols for debugging live app. use SYMBOL_TABLE to get function names, FULL to get function names, files, and line numbers
-    android.buildTypes.release.ndk.debugSymbolLevel = 'FULL'
+    //android.buildTypes.release.ndk.debugSymbolLevel = 'FULL'
 }
